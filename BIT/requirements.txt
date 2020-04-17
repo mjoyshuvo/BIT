@@ -1,0 +1,9 @@
+asgiref==3.2.7
+Django==3.0.5
+djangorestframework==3.10.2
+Jinja2==2.11.2
+MarkupSafe==1.1.1
+psycopg2-binary==2.8.5
+pytz==2019.3
+six==1.14.0
+sqlparse==0.3.1

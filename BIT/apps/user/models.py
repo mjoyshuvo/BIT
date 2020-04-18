@@ -55,5 +55,14 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
 class OauthCode(models.Model):
     user = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
     code = models.CharField(null=False, blank=False, max_length=100)
+    access_token = models.CharField(null=True, blank=True, max_length=250)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class SelectedRepos(models.Model):
+    user = models.ForeignKey(UserProfile, null=False, blank=False, on_delete=models.PROTECT)
+    repo_name = models.CharField(max_length=250, null=False, blank=False)
+    stars = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

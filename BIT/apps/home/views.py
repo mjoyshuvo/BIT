@@ -52,6 +52,15 @@ def get_repo(request, repo):
             name = repo_obj.name
             stars = repo_obj.stargazers_count
             SelectedRepos.objects.create(user=request.user, repo_name=name, stars=stars)
+            """Creating Webhook"""
+            repo_obj = git.get_repo("{owner}/{repo_name}".format(owner=GIT_USERNAME, repo_name=repo))
+            events = ["push", "pull_request"]
+            config = {
+                "url": "http://{host}/{endpoint}".format(host='http://0.0.0.0:8000', endpoint='webhook'),
+                "content_type": "json"
+            }
+            web_hook = repo_obj.create_hook("web", config, events, active=True)
+            print(web_hook)
             return HttpResponse("ok")
         else:
             return render(request, 'home.html', {'title': 'BITS Project', 'client_id': client_id})

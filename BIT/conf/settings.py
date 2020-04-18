@@ -11,7 +11,7 @@ SECRET_KEY = 'zf9tkl562hs4#qj8415g7+$qu!1(@b81pn1o!5i4azwsv!z&80'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = '/'
@@ -134,3 +134,6 @@ USE_L10N = True
 USE_TZ = True
 
 AUTH_USER_MODEL = 'user.UserProfile'
+
+CLIENT_ID = '23f083fd33cdcbc76754'
+CLIENT_SECRET = 'd6aed17c092e7c9bc2ce999f125f632231dbb4f9'

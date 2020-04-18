@@ -50,3 +50,10 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
 
         return self.email
+
+
+class OauthCode(models.Model):
+    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
+    code = models.CharField(null=False, blank=False, max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

@@ -9,7 +9,6 @@ from apps.api import urls as api_urls
 urlpatterns = [
     path('', home, name='home'),
     path('git_redirect', git_redirect, name='home'),
-    path('git_oauth', git_oauth, name='git_oauth'),
     path('admin/', admin.site.urls),
     path('', include('django.contrib.auth.urls')),
     url(r'^api/v1/', include(api_urls, 'api_v1'))

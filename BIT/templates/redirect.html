@@ -1,11 +1,16 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="container">
-        <div class="com-md-12">
-            <p>redirect</p>
-        </div>
+<div class="container">
+    <div class="com-md-12">
+        <h3>Select One of the given public repositories</h3>
+        <ul id="navigation">
+            {% for repo in public_repos %}
+                <li><a href="http://0.0.0.0:8000/get_repo/{{repo.name}}">{{ repo.name }}</a></li>
+            {% endfor %}
+        </ul>
     </div>
+</div>
 
 
 {% endblock %}

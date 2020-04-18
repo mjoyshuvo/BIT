@@ -2,8 +2,9 @@ from django.http import HttpResponse
 from django.shortcuts import render
 import requests
 from django.contrib.auth.decorators import login_required
-from conf.settings import CLIENT_ID
 from apps.user.models import UserProfile, OauthCode
+from conf.settings import CLIENT_ID, CLIENT_SECRET, GIT_USERNAME
+from github import Github
 
 
 @login_required(login_url='/login/')
@@ -14,7 +15,7 @@ def home(request):
 
 
 def git_redirect(request):
-    title = 'redirect page'
+    title = 'Redirect page'
     user = request.user
     code = request.GET['code']
     if user:
@@ -24,15 +25,16 @@ def git_redirect(request):
             oauth_data.save()
         except OauthCode.DoesNotExist:
             oauth_data = OauthCode.objects.create(user=user, code=code)
-        print(oauth_data)
-    return render(request, 'redirect.html', {'title': title})
+    access_token_url = 'https://github.com/login/oauth/access_token'
+    params = {'client_id': CLIENT_ID, 'client_secret': CLIENT_SECRET, 'code': code,
+              'redirect_uri': 'http://0.0.0.0:8000/git_redirect'}
+    headers = {'Accept': 'application/json'}
+    response = requests.post(url=access_token_url, data=params, headers=headers)
+    access_token = response.json()['access_token']
+    git = Github(access_token)
+    public_repos = git.get_user().get_repos(type='public')
+    # for repo in git.get_user().get_repos(type='public'):
+    #     print(repo.name)
 
+    return render(request, 'redirect.html', {'title': title, 'public_repos': public_repos})
 
-def git_oauth(request):
-    params = {'client_id': '23f083fd33cdcbc76754', 'redirect_uri': 'http://0.0.0.0:8000/git_redirect', 'scope': 'repo',
-              'state': 'state',
-              'login': 'mjoyshuvo', 'allow_signup': True}
-    oauth_url = 'https://github.com/login/oauth/authorize'
-    r = requests.get(url=oauth_url, params=params)
-    print(r)
-    return HttpResponse("OK")

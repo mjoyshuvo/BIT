@@ -137,3 +137,5 @@ AUTH_USER_MODEL = 'user.UserProfile'
 
 CLIENT_ID = '23f083fd33cdcbc76754'
 CLIENT_SECRET = 'd6aed17c092e7c9bc2ce999f125f632231dbb4f9'
+GIT_USERNAME = 'mjoyshuvo'
+

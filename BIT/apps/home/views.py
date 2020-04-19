@@ -2,9 +2,14 @@ from django.http import HttpResponse
 from django.shortcuts import render
 import requests
 from django.contrib.auth.decorators import login_required
+from requests import Response
+
 from apps.user.models import UserProfile, OauthCode, SelectedRepos
 from conf.settings import CLIENT_ID, CLIENT_SECRET, GIT_USERNAME
 from github import Github
+from pyramid.config import Configurator
+from pyramid.view import view_config, view_defaults
+from wsgiref.simple_server import make_server
 
 
 @login_required(login_url='/login/')
@@ -54,15 +59,67 @@ def get_repo(request, repo):
             SelectedRepos.objects.create(user=request.user, repo_name=name, stars=stars)
             """Creating Webhook"""
             repo_obj = git.get_repo("{owner}/{repo_name}".format(owner=GIT_USERNAME, repo_name=repo))
-            events = ["push", "pull_request"]
+            events = ['*']
             config = {
                 "url": "http://{host}/{endpoint}".format(host='http://0.0.0.0:8000', endpoint='webhook'),
                 "content_type": "json"
             }
-            web_hook = repo_obj.create_hook("web", config, events, active=True)
-            print(web_hook)
+            try:
+                web_hook = repo_obj.create_hook("web", config, events, active=True)
+
+                hook_config = Configurator()
+                # https://pygithub.readthedocs.io/en/latest/examples/Webhook.html
+                hook_config.add_route('webhook', "/{}".format('webhook'))
+                hook_config.scan()
+            except Exception as e:
+                pass
+            #
+            # app = hook_config.make_wsgi_app()
+            # server = make_server("0.0.0.0", 8080, app)
+            # server.serve_forever()
             return HttpResponse("ok")
         else:
             return render(request, 'home.html', {'title': 'BITS Project', 'client_id': client_id})
     except OauthCode.DoesNotExist:
         return render(request, 'home.html', {'title': 'BITS Project', 'client_id': client_id})
+
+
+@view_defaults(
+    route_name='webhook', renderer="json", request_method="POST"
+)
+class PayloadView(object):
+    """
+    View receiving of Github payload. By default, this view it's fired only if
+    the request is json and method POST.
+    """
+
+    def __init__(self, request):
+        self.request = request
+        # Payload from Github, it's a dict
+        self.payload = self.request.json
+
+    @view_config(header="X-Github-Event:push")
+    def payload_push(self):
+        """This method is a continuation of PayloadView process, triggered if
+        header HTTP-X-Github-Event type is Push"""
+        print("No. commits in push:", len(self.payload['commits']))
+        return Response("success")
+
+    @view_config(header="X-Github-Event:pull_request")
+    def payload_pull_request(self):
+        """This method is a continuation of PayloadView process, triggered if
+        header HTTP-X-Github-Event type is Pull Request"""
+        print("PR", self.payload['action'])
+        print("No. Commits in PR:", self.payload['pull_request']['commits'])
+
+        return Response("success")
+
+    @view_config(header="X-Github-Event:ping")
+    def payload_else(self):
+        print("Pinged! Webhook created with id {}!".format(self.payload["hook"]["id"]))
+        return {"status": 200}
+
+
+def web_hook(request):
+    print("ok")
+    return "ok"

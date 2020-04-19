@@ -68,7 +68,6 @@ def get_repo(request, repo):
                 web_hook = repo_obj.create_hook("web", config, events, active=True)
 
                 hook_config = Configurator()
-                # https://pygithub.readthedocs.io/en/latest/examples/Webhook.html
                 hook_config.add_route('webhook', "/{}".format('webhook'))
                 hook_config.scan()
             except Exception as e:
